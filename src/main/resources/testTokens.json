@@ -1,0 +1,16 @@
+[
+    {
+        "aud": "Y3JzMQ==",
+        "scope": "ZnJfdGVtcA==",
+        "iss": "ZlRlc3RBUw==",
+        "cti": "RnRva2VuMQ==",
+        "cnf": "owJGb3VyS2V5AQQgUGFiYwQFBgcICQoLDA0ODxA="
+    },
+    {
+        "aud": "Y3JzMQ==",
+        "scope": "ZXJfY28y",
+        "iss": "ZlRlc3RBUw==",
+        "cti": "RnRva2VuMg==",
+        "cnf": "piJYIPOBLlg88IpssJk4TT3nQGjuFc19OvPdsUXSb8n2+mtZAkNycGsDJiFYIFGnTv9r7rh2khfVDL4ixptiKVohUI3fxEdpCmKjl711AQIgAQ=="
+    }
+]
