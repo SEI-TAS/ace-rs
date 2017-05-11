@@ -20,7 +20,8 @@ import se.sics.ace.COSEparams;
 import se.sics.ace.TimeProvider;
 import se.sics.ace.as.PDP;
 import se.sics.ace.coap.as.CoapAceEndpoint;
-import se.sics.ace.coap.rs.DTLSProfilePskStore;
+import se.sics.ace.coap.rs.dtlsProfile.DtlspAuthzInfo;
+import se.sics.ace.coap.rs.dtlsProfile.DtlspPskStore;
 import se.sics.ace.cwt.CwtCryptoCtx;
 import se.sics.ace.examples.KissTime;
 import se.sics.ace.examples.KissValidator;
@@ -47,15 +48,8 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
 
     private static byte[] key128 = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
-    /**
-     * The token endpoint
-     */
     private AuthzInfo authInfoResource = null;
-
-    /**
-     * The introspect endpoint
-     */
-    private CoapAceEndpoint authInfoEndpoint;
+    private DtlspAuthzInfo authInfoEndpoint;
 
     /**
      * Constructor.
@@ -73,10 +67,11 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         COSEparams coseP = new COSEparams(MessageTag.Encrypt0, AlgorithmID.AES_CCM_16_128_128, AlgorithmID.Direct);
         CwtCryptoCtx ctx = CwtCryptoCtx.encrypt0(key128, coseP.getAlg().AsCBOR());
 
-        TokenRepository tokenRepo = new TokenRepository(scopeValidator, resources,"src/test/resources/tokens.json", ctx);
+        TokenRepository.create(scopeValidator, "src/test/resources/tokens.json", ctx);
+        TokenRepository tokenRepo = TokenRepository.getInstance();
         List<String> issuers = Collections.singletonList("TestAS");
         this.authInfoResource = new AuthzInfo(tokenRepo, issuers, time, null, audValidator, ctx);
-        this.authInfoEndpoint = new CoapAceEndpoint("auth-info", this.authInfoResource);
+        this.authInfoEndpoint = new DtlspAuthzInfo(this.authInfoResource);
         add(this.authInfoEndpoint);
 
         DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder(
@@ -92,7 +87,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
                     CipherSuite.TLS_PSK_WITH_AES_128_CCM_8});
         }
 
-        DTLSProfilePskStore store = new DTLSProfilePskStore(this.authInfoResource);
+        DtlspPskStore store = new DtlspPskStore(this.authInfoResource);
         config.setPskStore(store);
         if (asymmetricKey != null) {
             config.setIdentity(asymmetricKey.AsPrivateKey(), asymmetricKey.AsPublicKey());
@@ -105,6 +100,6 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     @Override
     public void close() throws Exception {
         LOGGER.info("Closing down CoapsRS ...");
-        this.authInfoEndpoint.close();
+        //this.authInfoEndpoint.close();
     }
 }
