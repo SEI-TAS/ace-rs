@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import COSE.*;
 import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.scandium.DTLSConnector;
@@ -19,15 +18,10 @@ import org.eclipse.californium.scandium.dtls.pskstore.StaticPskStore;
 import se.sics.ace.AceException;
 import se.sics.ace.COSEparams;
 import se.sics.ace.TimeProvider;
-import se.sics.ace.as.PDP;
-import se.sics.ace.coap.as.CoapAceEndpoint;
 import se.sics.ace.coap.rs.dtlsProfile.AsInfo;
 import se.sics.ace.coap.rs.dtlsProfile.DtlspAuthzInfo;
 import se.sics.ace.coap.rs.dtlsProfile.DtlspDeliverer;
-import se.sics.ace.coap.rs.dtlsProfile.DtlspPskStore;
 import se.sics.ace.cwt.CwtCryptoCtx;
-import se.sics.ace.examples.KissTime;
-import se.sics.ace.examples.KissValidator;
 import se.sics.ace.rs.AudienceValidator;
 import se.sics.ace.rs.AuthzInfo;
 import se.sics.ace.rs.ScopeValidator;
@@ -52,7 +46,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     private static byte[] sharedKey256Bytes = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,28, 29, 30, 31, 32};
     //private static byte[] sharedKey128Bytes = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
-    private AuthzInfo authInfoResource = null;
+    private AuthzInfo authInfoHandler = null;
     private DtlspAuthzInfo authInfoEndpoint;
 
     /**
@@ -74,15 +68,18 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         TokenRepository.create(scopeValidator, "src/test/resources/tokens.json", ctx);
         TokenRepository tokenRepo = TokenRepository.getInstance();
         List<String> issuers = Collections.singletonList("TestAS");
-        this.authInfoResource = new AuthzInfo(tokenRepo, issuers, time, null, audValidator, ctx);
-        this.authInfoEndpoint = new DtlspAuthzInfo(this.authInfoResource);
+        this.authInfoHandler = new AuthzInfo(tokenRepo, issuers, time, null, audValidator, ctx);
+        this.authInfoEndpoint = new DtlspAuthzInfo(this.authInfoHandler);
         add(this.authInfoEndpoint);
 
         addEndpoint(getCoapsEndpoint());
 
-        AsInfo asi = new AsInfo("coaps://blah/authz-info/");
+        // Add actual resources.
+        add(new RS1Resource());
+
+        AsInfo asi = new AsInfo("coaps://localhost/authz-info/");
         DtlspDeliverer dpd = new DtlspDeliverer(getRoot(), tokenRepo, null, asi);
-        //setMessageDeliverer(dpd);
+        setMessageDeliverer(dpd);
     }
 
     private CoapEndpoint getCoapsEndpoint() throws CoseException, IOException
@@ -91,7 +88,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder(new InetSocketAddress(5685));
         config.setSupportedCipherSuites(new CipherSuite[]{CipherSuite.TLS_PSK_WITH_AES_128_CCM_8});
 
-        //DtlspPskStore store = new DtlspPskStore(this.authInfoResource);
+        //DtlspPskStore store = new DtlspPskStore(this.authInfoHandler);
         // Add clientA to store, so it can be known by RS. This should be the result of pairing or something...
         config.setPskStore(new StaticPskStore("clientA", sharedKey256Bytes));
 
