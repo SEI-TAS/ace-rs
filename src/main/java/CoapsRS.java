@@ -49,7 +49,8 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
      */
     private static final Logger LOGGER = Logger.getLogger(CoapsRS.class.getName());
 
-    static byte[] sharedKey256Bytes = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,28, 29, 30, 31, 32};
+    private static byte[] sharedKey256Bytes = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,28, 29, 30, 31, 32};
+    //private static byte[] sharedKey128Bytes = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
     private AuthzInfo authInfoResource = null;
     private DtlspAuthzInfo authInfoEndpoint;
@@ -67,7 +68,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
                    AudienceValidator audValidator, ScopeValidator scopeValidator,
                    OneKey asymmetricKey) throws AceException, CoseException, IOException {
 
-        COSEparams coseP = new COSEparams(MessageTag.Encrypt0, AlgorithmID.AES_CCM_16_128_256, AlgorithmID.Direct);
+        COSEparams coseP = new COSEparams(MessageTag.Encrypt0, AlgorithmID.AES_CCM_16_64_256, AlgorithmID.Direct);
         CwtCryptoCtx ctx = CwtCryptoCtx.encrypt0(sharedKey256Bytes, coseP.getAlg().AsCBOR());
 
         TokenRepository.create(scopeValidator, "src/test/resources/tokens.json", ctx);
