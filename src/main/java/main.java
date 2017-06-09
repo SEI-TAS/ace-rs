@@ -16,22 +16,17 @@ public class main {
 
             Set<String> actions = new HashSet<>();
             actions.add("GET");
-            Map<String, Set<String>> myResource = new HashMap<>();
-            myResource.put("temp", actions);
+            actions.add("POST");
+
+            Map<String, Set<String>> tempResource = new HashMap<>();
+            tempResource.put("temp", actions);
+
             Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
-            myScopes.put("r_temp", myResource);
+            myScopes.put("r_temp", tempResource);
 
-            myResource.clear();
-            myResource.put("co2", actions);
-            myScopes.put("r_co2", myResource);
+            KissValidator validator = new KissValidator(Collections.singleton("rs1"), myScopes);
 
-            KissValidator valid = new KissValidator(Collections.singleton("rs1"), myScopes);
-
-            Set<String> resources = new HashSet<>();
-            resources.add("temp");
-            resources.add("co2");
-
-            CoapsRS rsServer = new CoapsRS(new KissTime(), resources, valid, valid, null);
+            CoapsRS rsServer = new CoapsRS(new KissTime(), validator, validator);
 
             System.out.println("Starting server");
             rsServer.start();

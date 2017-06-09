@@ -21,6 +21,7 @@ import se.sics.ace.TimeProvider;
 import se.sics.ace.coap.rs.dtlsProfile.AsInfo;
 import se.sics.ace.coap.rs.dtlsProfile.DtlspAuthzInfo;
 import se.sics.ace.coap.rs.dtlsProfile.DtlspDeliverer;
+import se.sics.ace.coap.rs.dtlsProfile.DtlspPskStore;
 import se.sics.ace.cwt.CwtCryptoCtx;
 import se.sics.ace.rs.AudienceValidator;
 import se.sics.ace.rs.AuthzInfo;
@@ -58,9 +59,8 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
      * @throws CoseException
      *
      */
-    public CoapsRS(TimeProvider time, Set<String> resources,
-                   AudienceValidator audValidator, ScopeValidator scopeValidator,
-                   OneKey asymmetricKey) throws AceException, CoseException, IOException {
+    public CoapsRS(TimeProvider time, AudienceValidator audValidator, ScopeValidator scopeValidator)
+            throws AceException, CoseException, IOException {
 
         COSEparams coseP = new COSEparams(MessageTag.Encrypt0, AlgorithmID.AES_CCM_16_64_256, AlgorithmID.Direct);
         CwtCryptoCtx ctx = CwtCryptoCtx.encrypt0(sharedKey256Bytes, coseP.getAlg().AsCBOR());
@@ -88,9 +88,8 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder(new InetSocketAddress(5685));
         config.setSupportedCipherSuites(new CipherSuite[]{CipherSuite.TLS_PSK_WITH_AES_128_CCM_8});
 
-        //DtlspPskStore store = new DtlspPskStore(this.authInfoHandler);
-        // Add clientA to store, so it can be known by RS. This should be the result of pairing or something...
-        config.setPskStore(new StaticPskStore("clientA", sharedKey256Bytes));
+        DtlspPskStore psk = new DtlspPskStore(this.authInfoHandler);
+        config.setPskStore(psk);
 
         DTLSConnector connector = new DTLSConnector(config.build());
         CoapEndpoint endpoint = new CoapEndpoint(connector, NetworkConfig.getStandard());

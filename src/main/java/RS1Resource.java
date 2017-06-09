@@ -15,4 +15,11 @@ public class RS1Resource extends CoapResource {
     {
         exchange.respond("35.0 C");
     }
+
+    @Override
+    public void handlePOST(CoapExchange exchange)
+    {
+        exchange.respond("35.0 C");
+    }
+
 }
