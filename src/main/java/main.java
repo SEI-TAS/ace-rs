@@ -13,20 +13,16 @@ public class main {
    public static void main(String[] args)
     {
         try {
-
-            Set<String> actions = new HashSet<>();
-            actions.add("GET");
-            actions.add("POST");
-
-            Map<String, Set<String>> tempResource = new HashMap<>();
-            tempResource.put("temp", actions);
-
             Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
-            myScopes.put("r_temp", tempResource);
 
-            KissValidator validator = new KissValidator(Collections.singleton("rs1"), myScopes);
+            TempResource tempResource = new TempResource();
+            myScopes.put(tempResource.getScopeName(), tempResource.getScopeHandler());
 
-            CoapsRS rsServer = new CoapsRS(new KissTime(), validator, validator);
+            CoapsRS rsServer = new CoapsRS(myScopes);
+            rsServer.setAS("TestAS", "coaps://localhost/authz-info/");
+
+            // Add actual resources.
+            rsServer.add(tempResource);
 
             System.out.println("Starting server");
             rsServer.start();
