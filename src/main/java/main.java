@@ -19,7 +19,10 @@ public class main {
             myScopes.put(tempResource.getScopeName(), tempResource.getScopeHandler());
 
             CoapsRS rsServer = new CoapsRS(myScopes);
-            rsServer.setAS("TestAS", "coaps://localhost/authz-info/");
+
+            // This should be called as the result of pairing.
+            byte[] sharedKey256Bytes = {'b', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,28, 29, 30, 31, 32};
+            rsServer.setAS("AAIoT_AS", "coaps://localhost/authz-info/", sharedKey256Bytes);
 
             // Add actual resources.
             rsServer.add(tempResource);
