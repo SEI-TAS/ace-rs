@@ -3,10 +3,8 @@ import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Sebastian on 2017-05-19.
@@ -20,8 +18,12 @@ public class TempResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange)
     {
+        int minTemp = 21;
+        int maxTemp = 36;
+        int currentTemp = ThreadLocalRandom.current().nextInt(minTemp, maxTemp + 1);
+
         CBORObject temperature = CBORObject.NewMap();
-        temperature.Add(1, 35.0);
+        temperature.Add(1, currentTemp);
         temperature.Add(2, "C");
         exchange.respond(CoAP.ResponseCode.CONTENT, temperature.EncodeToBytes());
     }
@@ -33,9 +35,11 @@ public class TempResource extends CoapResource {
         return actions;
     }
 
-    public String getScopeName()
+    public List<String> getScopeNames()
     {
-        return "r_temp";
+        ArrayList<String> scopeNames = new ArrayList<>();
+        scopeNames.add("r_temp");
+        return scopeNames;
     }
 
     public Map<String, Set<String>> getScopeHandler()

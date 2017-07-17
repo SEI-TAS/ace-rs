@@ -16,7 +16,8 @@ public class main {
             Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
 
             TempResource tempResource = new TempResource();
-            myScopes.put(tempResource.getScopeName(), tempResource.getScopeHandler());
+            for(String scopeName : tempResource.getScopeNames())
+                myScopes.put(scopeName, tempResource.getScopeHandler());
 
             CoapsRS rsServer = new CoapsRS(myScopes);
 
