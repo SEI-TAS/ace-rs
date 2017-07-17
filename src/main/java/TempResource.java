@@ -1,4 +1,6 @@
+import com.upokecenter.cbor.CBORObject;
 import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 import java.util.HashMap;
@@ -18,21 +20,16 @@ public class TempResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange)
     {
-        exchange.respond("35.0 C");
-    }
-
-    @Override
-    public void handlePOST(CoapExchange exchange)
-    {
-        exchange.respond("35.0 C");
+        CBORObject temperature = CBORObject.NewMap();
+        temperature.Add(1, 35.0);
+        temperature.Add(2, "C");
+        exchange.respond(CoAP.ResponseCode.CONTENT, temperature.EncodeToBytes());
     }
 
     public Set<String> getActions()
     {
         Set<String> actions = new HashSet<>();
         actions.add("GET");
-        actions.add("POST");
-
         return actions;
     }
 
