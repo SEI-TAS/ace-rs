@@ -1,11 +1,10 @@
-/**
+package edu.cmu.sei.ttg.aaiot.rs; /**
  * Created by Sebastian on 2017-05-05.
  */
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.concurrent.ThreadLocalRandom;
 
 import COSE.*;
 import org.eclipse.californium.core.CoapServer;
@@ -45,7 +44,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
      */
     private static final Logger LOGGER = Logger.getLogger(CoapsRS.class.getName());
 
-    private static final String NAME = "rs1";
+    private String name;
     private static final String TOKEN_FILE_PATH = "src/test/resources/tokens.json";
 
     private AuthzInfo authInfoHandler = null;
@@ -65,10 +64,11 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
      * @throws CoseException
      *
      */
-    public CoapsRS(Map<String, Map<String, Set<String>>> myScopes)
+    public CoapsRS(String name, Map<String, Map<String, Set<String>>> myScopes)
             throws AceException, CoseException, IOException {
 
-        KissValidator validator = new KissValidator(Collections.singleton(NAME), myScopes);
+        this.name = name;
+        KissValidator validator = new KissValidator(Collections.singleton(name), myScopes);
         audienceValidator = validator;
         scopeValidator = validator;
     }

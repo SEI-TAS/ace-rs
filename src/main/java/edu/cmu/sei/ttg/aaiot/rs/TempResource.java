@@ -1,3 +1,5 @@
+package edu.cmu.sei.ttg.aaiot.rs;
+
 import com.upokecenter.cbor.CBORObject;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
