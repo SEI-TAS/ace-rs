@@ -39,10 +39,19 @@ public class Controller implements ICredentialStore
 
             switch (choice) {
                 case 'p':
-                    pair();
-                    System.out.println("Paired!");
-                    setupCoapRS();
-                    System.out.println("Server restarted!");
+                    boolean success = pair();
+
+                    if(success)
+                    {
+                        System.out.println("Finished pairing procedure!");
+                        setupCoapRS();
+                        System.out.println("Server restarted!");
+                    }
+                    else
+                    {
+                        System.out.println("Pairing aborted.");
+                    }
+
                     break;
                 case 'q':
                     System.exit(0);
@@ -52,10 +61,19 @@ public class Controller implements ICredentialStore
         }
     }
 
-    public void pair() throws IOException
+    public boolean pair()
     {
-        PairingManager pairingManager = new PairingManager(this);
-        pairingManager.startPairing();
+        try
+        {
+            PairingManager pairingManager = new PairingManager(this);
+            pairingManager.startPairing();
+            return true;
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Error pairing: " + ex.toString());
+            return false;
+        }
     }
 
     private void setupCoapRS() throws COSE.CoseException, IOException, AceException
