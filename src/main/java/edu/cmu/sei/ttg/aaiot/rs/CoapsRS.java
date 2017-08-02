@@ -2,6 +2,7 @@ package edu.cmu.sei.ttg.aaiot.rs; /**
  * Created by Sebastian on 2017-05-05.
  */
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.logging.Logger;
@@ -45,7 +46,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(CoapsRS.class.getName());
 
     private String name;
-    private static final String TOKEN_FILE_PATH = "src/test/resources/tokens.json";
+    private static final String TOKEN_FILE_PATH = "src/main/resources/testTokens.json";
 
     private AuthzInfo authInfoHandler = null;
     private DtlspAuthzInfo authInfoEndpoint;
@@ -108,8 +109,11 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws AceException, IOException {
         LOGGER.info("Closing down CoapsRS ...");
+        tokenRepo.close();
+        new PrintWriter(TOKEN_FILE_PATH).close();
+        this.stop();
         //this.authInfoEndpoint.close();
     }
 }
