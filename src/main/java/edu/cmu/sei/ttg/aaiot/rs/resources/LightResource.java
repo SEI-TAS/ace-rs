@@ -1,4 +1,4 @@
-package edu.cmu.sei.ttg.aaiot.rs;
+package edu.cmu.sei.ttg.aaiot.rs.resources;
 
 import com.upokecenter.cbor.CBORObject;
 import org.eclipse.californium.core.CoapResource;
@@ -9,25 +9,25 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Created by Sebastian on 2017-05-19.
+ * Created by sebastianecheverria on 8/3/17.
  */
-public class TempResource extends CoapResource {
-    public TempResource() {
-        super("temp");
+public class LightResource extends CoapResource implements IIoTResource
+{
+    public LightResource() {
+        super("light");
         getAttributes().setTitle("Temperature Resource");
     }
 
     @Override
     public void handleGET(CoapExchange exchange)
     {
-        int minTemp = 21;
-        int maxTemp = 36;
-        int currentTemp = ThreadLocalRandom.current().nextInt(minTemp, maxTemp + 1);
+        int minVal = 0;
+        int maxVal = 1;
+        int currVal = ThreadLocalRandom.current().nextInt(minVal, maxVal + 1);
 
-        CBORObject temperature = CBORObject.NewMap();
-        temperature.Add(1, currentTemp);
-        temperature.Add(2, "C");
-        exchange.respond(CoAP.ResponseCode.CONTENT, temperature.EncodeToBytes());
+        CBORObject lightsStatus = CBORObject.NewMap();
+        lightsStatus.Add(1, currVal);
+        exchange.respond(CoAP.ResponseCode.CONTENT, lightsStatus.EncodeToBytes());
     }
 
     public Set<String> getActions()
@@ -40,16 +40,17 @@ public class TempResource extends CoapResource {
     public List<String> getScopeNames()
     {
         ArrayList<String> scopeNames = new ArrayList<>();
-        scopeNames.add("r_temp");
+        scopeNames.add("r_light");
         return scopeNames;
     }
 
     public Map<String, Set<String>> getScopeHandler()
     {
-        Map<String, Set<String>> tempResourceMap = new HashMap<>();
-        tempResourceMap.put(this.getName(), this.getActions());
-        return tempResourceMap;
+        Map<String, Set<String>> resourceMap = new HashMap<>();
+        resourceMap.put(this.getName(), this.getActions());
+        return resourceMap;
     }
 
 
 }
+

@@ -2,6 +2,9 @@ package edu.cmu.sei.ttg.aaiot.rs;
 
 import edu.cmu.sei.ttg.aaiot.rs.pairing.ICredentialStore;
 import edu.cmu.sei.ttg.aaiot.rs.pairing.PairingManager;
+import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
+import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
+import edu.cmu.sei.ttg.aaiot.rs.resources.TempResource;
 import org.eclipse.californium.core.CoapResource;
 import se.sics.ace.AceException;
 
@@ -20,15 +23,21 @@ public class Controller implements ICredentialStore
 
     private CoapsRS rsServer = null;
     Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
-    ArrayList<CoapResource> resources = new ArrayList<>();
+    ArrayList<IIoTResource> resources = new ArrayList<>();
 
     public void run() throws COSE.CoseException, IOException, AceException
     {
         TempResource tempResource = new TempResource();
         resources.add(tempResource);
-        for(String scopeName : tempResource.getScopeNames())
-            myScopes.put(scopeName, tempResource.getScopeHandler());
 
+        LightResource lightResource = new LightResource();
+        resources.add(lightResource);
+
+        for(IIoTResource resource : resources)
+        {
+            for (String scopeName : resource.getScopeNames())
+                myScopes.put(scopeName, tempResource.getScopeHandler());
+        }
 
         Scanner scanner = new Scanner(System.in);
 
@@ -89,9 +98,9 @@ public class Controller implements ICredentialStore
         rsServer.setAS(asId, "coaps://localhost/authz-info/", psk);
 
         // Add actual resources.
-        for (CoapResource resource : resources)
+        for (IIoTResource resource : resources)
         {
-            rsServer.add(resource);
+            rsServer.add((CoapResource) resource);
         }
 
         System.out.println("Starting server");
