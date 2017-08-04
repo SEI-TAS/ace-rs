@@ -36,7 +36,7 @@ public class Controller implements ICredentialStore
         for(IIoTResource resource : resources)
         {
             for (String scopeName : resource.getScopeNames())
-                myScopes.put(scopeName, tempResource.getScopeHandler());
+                myScopes.put(scopeName, resource.getScopeHandler());
         }
 
         Scanner scanner = new Scanner(System.in);
