@@ -18,8 +18,7 @@ public class Controller
 {
     private static final String rsId = "rs1";
 
-    private String asId;
-    private byte[] psk;
+    private FileCredentialStore credentialStore;
 
     private CoapsRS rsServer = null;
     Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
@@ -27,6 +26,8 @@ public class Controller
 
     public void run() throws COSE.CoseException, IOException, AceException
     {
+        credentialStore = new FileCredentialStore();
+
         TempResource tempResource = new TempResource();
         resources.add(tempResource);
 
@@ -42,34 +43,41 @@ public class Controller
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
-            System.out.println("");
-            System.out.println("Choose (p)air and restart server, (s)tart server, or (q)uit: ");
-            char choice = scanner.next().charAt(0);
+            try
+            {
+                System.out.println("");
+                System.out.println("Choose (p)air and restart server, (s)tart server, or (q)uit: ");
+                char choice = scanner.next().charAt(0);
 
-            switch (choice) {
-                case 'p':
-                    boolean success = pair();
+                switch (choice)
+                {
+                    case 'p':
+                        boolean success = pair();
 
-                    if(success)
-                    {
-                        System.out.println("Finished pairing procedure!");
+                        if (success)
+                        {
+                            System.out.println("Finished pairing procedure!");
+                            setupCoapRS();
+                            System.out.println("Server restarted!");
+                        } else
+                        {
+                            System.out.println("Pairing aborted.");
+                        }
+
+                        break;
+                    case 's':
                         setupCoapRS();
-                        System.out.println("Server restarted!");
-                    }
-                    else
-                    {
-                        System.out.println("Pairing aborted.");
-                    }
-
-                    break;
-                case 's':
-                    setupCoapRS();
-                    break;
-                case 'q':
-                    System.exit(0);
-                    break;
-                default:
-                    System.out.println("Invalid command.");
+                        break;
+                    case 'q':
+                        System.exit(0);
+                        break;
+                    default:
+                        System.out.println("Invalid command.");
+                }
+            }
+            catch(Exception ex)
+            {
+                System.out.println("Error processing command: " + ex.toString());
             }
         }
     }
@@ -78,7 +86,7 @@ public class Controller
     {
         try
         {
-            PairingManager pairingManager = new PairingManager(rsId, getScopes(), new FileCredentialStore());
+            PairingManager pairingManager = new PairingManager(rsId, getScopes(), credentialStore);
             pairingManager.startPairing();
             return true;
         }
@@ -99,7 +107,7 @@ public class Controller
         rsServer = new CoapsRS(rsId, myScopes);
 
         // TODO: should get URL from AS as well.
-        rsServer.setAS(asId, "coaps://localhost/authz-info/", psk);
+        rsServer.setAS(credentialStore.getASid(), "coaps://localhost/authz-info/", credentialStore.getRawASPSK());
 
         // Add actual resources.
         for (IIoTResource resource : resources)
