@@ -1,5 +1,6 @@
 package edu.cmu.sei.ttg.aaiot.rs.pairing;
 
+import edu.cmu.sei.ttg.aaiot.credentials.ICredentialStore;
 import edu.cmu.sei.ttg.aaiot.network.IMessageHandler;
 import edu.cmu.sei.ttg.aaiot.network.UDPClient;
 import edu.cmu.sei.ttg.aaiot.network.UDPServer;
@@ -17,11 +18,15 @@ public class PairingManager implements IMessageHandler
     private static final String separator = ":";
     private static final int PORT = 9877;
 
+    private String id;
+    private Set<String> scopes;
     private ICredentialStore credentialStore;
     private UDPServer udpServer;
 
-    public PairingManager(ICredentialStore credentialStore)
+    public PairingManager(String myId, Set<String> scopes, ICredentialStore credentialStore)
     {
+        this.id = myId;
+        this.scopes = scopes;
         this.credentialStore = credentialStore;
     }
 
@@ -50,9 +55,8 @@ public class PairingManager implements IMessageHandler
                 credentialStore.storeAS(asId, Base64.getDecoder().decode(psk));
 
                 // Send id
-                String clientId = credentialStore.getId();
-                Set<String> scopes = credentialStore.getScopes();
-                String scopesString = String.join(";", scopes);
+                String clientId = this.id;
+                String scopesString = String.join(";", this.scopes);
 
                 try {
                     UDPClient udpClient = new UDPClient(sourceIP, sourcePort);

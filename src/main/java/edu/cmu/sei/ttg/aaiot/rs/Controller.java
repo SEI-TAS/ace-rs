@@ -1,6 +1,6 @@
 package edu.cmu.sei.ttg.aaiot.rs;
 
-import edu.cmu.sei.ttg.aaiot.rs.pairing.ICredentialStore;
+import edu.cmu.sei.ttg.aaiot.credentials.FileCredentialStore;
 import edu.cmu.sei.ttg.aaiot.rs.pairing.PairingManager;
 import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Created by Sebastian on 2017-07-11.
  */
-public class Controller implements ICredentialStore
+public class Controller
 {
     private static final String rsId = "rs1";
 
@@ -74,7 +74,7 @@ public class Controller implements ICredentialStore
     {
         try
         {
-            PairingManager pairingManager = new PairingManager(this);
+            PairingManager pairingManager = new PairingManager(rsId, getScopes(), new FileCredentialStore());
             pairingManager.startPairing();
             return true;
         }
@@ -107,30 +107,7 @@ public class Controller implements ICredentialStore
         rsServer.start();
     }
 
-    @Override
-    public String getId()
-    {
-        return rsId;
-    }
-
-    @Override
-    public boolean storeAS(String asId, byte[] psk)
-    {
-        try
-        {
-            this.asId = asId;
-            this.psk = psk;
-            return true;
-        }
-        catch(Exception ex)
-        {
-            System.out.println("Error storing AS key: " + ex.toString());
-            return false;
-        }
-    }
-
-    @Override
-    public Set<String> getScopes()
+    private Set<String> getScopes()
     {
         return new HashSet<>(myScopes.keySet());
     }

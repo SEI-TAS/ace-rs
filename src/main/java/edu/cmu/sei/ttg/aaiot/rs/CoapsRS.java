@@ -17,9 +17,9 @@ import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
 
 import se.sics.ace.AceException;
 import se.sics.ace.COSEparams;
-import se.sics.ace.coap.rs.dtlsProfile.AsInfo;
-import se.sics.ace.coap.rs.dtlsProfile.DtlspAuthzInfo;
-import se.sics.ace.coap.rs.dtlsProfile.DtlspDeliverer;
+import se.sics.ace.rs.AsInfo;
+import se.sics.ace.coap.rs.CoapAuthzInfo;
+import se.sics.ace.coap.rs.CoapDeliverer;
 import se.sics.ace.coap.rs.dtlsProfile.DtlspPskStore;
 import se.sics.ace.cwt.CwtCryptoCtx;
 import se.sics.ace.examples.KissTime;
@@ -49,7 +49,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     private static final String TOKEN_FILE_PATH = "src/main/resources/testTokens.json";
 
     private AuthzInfo authInfoHandler = null;
-    private DtlspAuthzInfo authInfoEndpoint;
+    private CoapAuthzInfo authInfoEndpoint;
 
     private AudienceValidator audienceValidator;
     private ScopeValidator scopeValidator;
@@ -84,13 +84,13 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
 
         List<String> issuers = Collections.singletonList(asName);
         this.authInfoHandler = new AuthzInfo(tokenRepo, issuers, new KissTime(), null, audienceValidator, ctx);
-        this.authInfoEndpoint = new DtlspAuthzInfo(this.authInfoHandler);
+        this.authInfoEndpoint = new CoapAuthzInfo(this.authInfoHandler);
         add(this.authInfoEndpoint);
 
         addEndpoint(getCoapsEndpoint());
 
         AsInfo asi = new AsInfo(asURI);
-        DtlspDeliverer dpd = new DtlspDeliverer(getRoot(), tokenRepo, null, asi);
+        CoapDeliverer dpd = new CoapDeliverer(getRoot(), tokenRepo, null, asi);
         setMessageDeliverer(dpd);
     }
 
