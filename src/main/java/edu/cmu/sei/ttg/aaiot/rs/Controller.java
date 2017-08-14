@@ -43,7 +43,7 @@ public class Controller
 
         while(true) {
             System.out.println("");
-            System.out.println("Choose (p)air and restart server, or (q)uit: ");
+            System.out.println("Choose (p)air and restart server, (s)tart server, or (q)uit: ");
             char choice = scanner.next().charAt(0);
 
             switch (choice) {
@@ -62,8 +62,12 @@ public class Controller
                     }
 
                     break;
+                case 's':
+                    setupCoapRS();
+                    break;
                 case 'q':
                     System.exit(0);
+                    break;
                 default:
                     System.out.println("Invalid command.");
             }
