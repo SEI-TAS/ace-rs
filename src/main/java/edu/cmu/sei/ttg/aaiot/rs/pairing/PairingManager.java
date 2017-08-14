@@ -52,7 +52,7 @@ public class PairingManager implements IMessageHandler
                 String psk = parts[2];
 
                 // Store PSK
-                credentialStore.storeAS(asId, Base64.getDecoder().decode(psk));
+                credentialStore.storeAS(asId, Base64.getDecoder().decode(psk), sourceIP);
 
                 // Send id
                 String clientId = this.id;
