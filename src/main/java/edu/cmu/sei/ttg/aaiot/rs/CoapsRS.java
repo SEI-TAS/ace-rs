@@ -76,7 +76,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
 
     public void setAS(String asName, String asURI, byte[] asPSK) throws AceException, CoseException, IOException
     {
-        COSEparams coseP = new COSEparams(MessageTag.Encrypt0, AlgorithmID.AES_CCM_16_64_256, AlgorithmID.Direct);
+        COSEparams coseP = new COSEparams(MessageTag.Encrypt0, AlgorithmID.AES_CCM_16_64_128, AlgorithmID.Direct);
         ctx = CwtCryptoCtx.encrypt0(asPSK, coseP.getAlg().AsCBOR());
 
         TokenRepository.create(scopeValidator, TOKEN_FILE_PATH, ctx);
