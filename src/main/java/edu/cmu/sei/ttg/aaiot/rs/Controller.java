@@ -1,7 +1,7 @@
 package edu.cmu.sei.ttg.aaiot.rs;
 
 import edu.cmu.sei.ttg.aaiot.credentials.FileCredentialStore;
-import edu.cmu.sei.ttg.aaiot.rs.pairing.PairingManager;
+import edu.cmu.sei.ttg.aaiot.pairing.PairingResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.TempResource;
@@ -82,13 +82,14 @@ public class Controller
         }
     }
 
+    // Handles the first part of the pair user command.
     public boolean pair()
     {
         try
         {
-            PairingManager pairingManager = new PairingManager(rsId, getScopes(), credentialStore);
-            pairingManager.startPairing();
-            return true;
+            byte[] key128 = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+            PairingResource pairingManager = new PairingResource(rsId, key128, getScopeString(), credentialStore);
+            return pairingManager.startPairing();
         }
         catch(Exception ex)
         {
@@ -97,6 +98,7 @@ public class Controller
         }
     }
 
+    // Starts the RS.
     private void setupCoapRS() throws COSE.CoseException, IOException, AceException
     {
         if(rsServer != null)
@@ -120,6 +122,11 @@ public class Controller
     private Set<String> getScopes()
     {
         return new HashSet<>(myScopes.keySet());
+    }
+
+    private String getScopeString()
+    {
+        return String.join(";", getScopes());
     }
 
 }
