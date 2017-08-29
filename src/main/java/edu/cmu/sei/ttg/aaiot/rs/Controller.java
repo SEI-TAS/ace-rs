@@ -16,7 +16,9 @@ import java.util.*;
  */
 public class Controller
 {
-    private static final String rsId = "rs1";
+    private static final String PAIRING_KEY_ID = "pairing";
+    private static final byte[] PAIRING_KEY = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    private static final String RS_ID = "rs1";
 
     private FileCredentialStore credentialStore;
 
@@ -28,12 +30,9 @@ public class Controller
     {
         credentialStore = new FileCredentialStore();
 
-        TempResource tempResource = new TempResource();
-        resources.add(tempResource);
-
-        LightResource lightResource = new LightResource();
-        resources.add(lightResource);
-
+        // Set up our static resources.
+        resources.add(new TempResource());
+        resources.add(new LightResource());
         for(IIoTResource resource : resources)
         {
             for (String scopeName : resource.getScopeNames())
@@ -41,7 +40,6 @@ public class Controller
         }
 
         Scanner scanner = new Scanner(System.in);
-
         while(true) {
             try
             {
@@ -87,9 +85,8 @@ public class Controller
     {
         try
         {
-            byte[] key128 = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-            PairingResource pairingManager = new PairingResource(rsId, key128, getScopeString(), credentialStore);
-            return pairingManager.startPairing();
+            PairingResource pairingManager = new PairingResource(PAIRING_KEY_ID, PAIRING_KEY, RS_ID, getScopeString(), credentialStore);
+            return pairingManager.pair();
         }
         catch(Exception ex)
         {
@@ -106,7 +103,7 @@ public class Controller
             rsServer.close();
         }
 
-        rsServer = new CoapsRS(rsId, myScopes);
+        rsServer = new CoapsRS(RS_ID, myScopes);
         rsServer.setAS(credentialStore.getASid(), "coaps://" + credentialStore.getASIP().getHostAddress() + "/authz-info/", credentialStore.getRawASPSK());
 
         // Add actual resources.
