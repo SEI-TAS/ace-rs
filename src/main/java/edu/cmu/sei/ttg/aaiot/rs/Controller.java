@@ -1,6 +1,6 @@
 package edu.cmu.sei.ttg.aaiot.rs;
 
-import edu.cmu.sei.ttg.aaiot.credentials.FileCredentialStore;
+import edu.cmu.sei.ttg.aaiot.credentials.FileASCredentialStore;
 import edu.cmu.sei.ttg.aaiot.pairing.PairingResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
@@ -20,7 +20,7 @@ public class Controller
     private static final byte[] PAIRING_KEY = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     private static final String RS_ID = "rs1";
 
-    private FileCredentialStore credentialStore;
+    private FileASCredentialStore credentialStore;
 
     private CoapsRS rsServer = null;
     Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
@@ -28,7 +28,7 @@ public class Controller
 
     public void run() throws COSE.CoseException, IOException, AceException
     {
-        credentialStore = new FileCredentialStore();
+        credentialStore = new FileASCredentialStore();
 
         // Set up our static resources.
         resources.add(new TempResource());
