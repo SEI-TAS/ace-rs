@@ -1,4 +1,6 @@
-package edu.cmu.sei.ttg.aaiot.rs; /**
+package edu.cmu.sei.ttg.aaiot.rs;
+
+/**
  * Created by Sebastian on 2017-05-05.
  */
 import java.io.IOException;
