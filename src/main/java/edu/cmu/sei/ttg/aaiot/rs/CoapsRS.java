@@ -126,11 +126,9 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     {
         CoapsPskClient client = new CoapsPskClient(this.asServerName, 5684, this.name, this.asPsk);
 
-        Map<String, CBORObject> params = new HashMap<>();
-        params.put("token", token);
-        CBORObject cborParams = Constants.abbreviate(params);
-
-        CBORObject reply = client.sendRequest("introspect", "post", cborParams);
+        CBORObject params = CBORObject.NewMap();
+        params.Add(Constants.TOKEN, token);
+        CBORObject reply = client.sendRequest("introspect", "post", params);
 
         Map<String, CBORObject> mapReply = Constants.unabbreviate(reply);
         boolean isActive = mapReply.get("active").AsBoolean();
