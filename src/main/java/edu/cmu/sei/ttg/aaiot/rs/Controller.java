@@ -104,7 +104,7 @@ public class Controller
         }
 
         rsServer = new CoapsRS(RS_ID, myScopes);
-        rsServer.setAS(credentialStore.getASid(), "coaps://" + credentialStore.getASIP().getHostAddress() + "/authz-info/", credentialStore.getRawASPSK());
+        rsServer.setAS(credentialStore.getASid(), credentialStore.getASIP().getHostAddress(), credentialStore.getRawASPSK());
 
         // Add actual resources.
         for (IIoTResource resource : resources)

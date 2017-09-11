@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import COSE.*;
+import com.upokecenter.cbor.CBORObject;
+import edu.cmu.sei.ttg.aaiot.network.CoapsPskClient;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.core.network.config.NetworkConfig;
@@ -19,6 +21,7 @@ import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
 
 import se.sics.ace.AceException;
 import se.sics.ace.COSEparams;
+import se.sics.ace.Constants;
 import se.sics.ace.rs.AsInfo;
 import se.sics.ace.coap.rs.CoapAuthzInfo;
 import se.sics.ace.coap.rs.CoapDeliverer;
@@ -50,6 +53,9 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     private String name;
     private static final String TOKEN_FILE_PATH = "src/main/resources/testTokens.json";
 
+    private String asServerName;
+    private byte[] asPsk;
+
     private AuthzInfo authInfoHandler = null;
     private CoapAuthzInfo authInfoEndpoint;
 
@@ -76,8 +82,11 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         scopeValidator = validator;
     }
 
-    public void setAS(String asName, String asURI, byte[] asPSK) throws AceException, CoseException, IOException
+    public void setAS(String asName, String asServerName, byte[] asPSK) throws AceException, CoseException, IOException
     {
+        this.asServerName = asServerName;
+        this.asPsk = asPSK;
+
         COSEparams coseP = new COSEparams(MessageTag.Encrypt0, AlgorithmID.AES_CCM_16_64_128, AlgorithmID.Direct);
         ctx = CwtCryptoCtx.encrypt0(asPSK, coseP.getAlg().AsCBOR());
 
@@ -91,6 +100,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
 
         addEndpoint(getCoapsEndpoint());
 
+        String asURI = "coaps://" + asServerName + "/authz-info/";
         AsInfo asi = new AsInfo(asURI);
         CoapDeliverer dpd = new CoapDeliverer(getRoot(), tokenRepo, null, asi);
         setMessageDeliverer(dpd);
@@ -108,6 +118,23 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         DTLSConnector connector = new DTLSConnector(config.build());
         CoapEndpoint endpoint = new CoapEndpoint(connector, NetworkConfig.getStandard());
         return endpoint;
+    }
+
+    // Sends an introspection request only to check if the token is still marked as valid or not. If invalid, this could
+    // be from a revoked or an expired token.
+    public boolean isTokenActive(CBORObject token) throws AceException
+    {
+        CoapsPskClient client = new CoapsPskClient(this.asServerName, 5684, this.name, this.asPsk);
+
+        Map<String, CBORObject> params = new HashMap<>();
+        params.put("token", token);
+        CBORObject cborParams = Constants.abbreviate(params);
+
+        CBORObject reply = client.sendRequest("introspect", "post", cborParams);
+
+        Map<String, CBORObject> mapReply = Constants.unabbreviate(reply);
+        boolean isActive = mapReply.get("active").AsBoolean();
+        return isActive;
     }
 
     @Override
