@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import COSE.*;
 import com.upokecenter.cbor.CBORObject;
 import edu.cmu.sei.ttg.aaiot.network.CoapsPskClient;
+import edu.cmu.sei.ttg.aaiot.tokens.RevokedTokenChecker;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.core.network.config.NetworkConfig;
@@ -51,7 +52,10 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(CoapsRS.class.getName());
 
     private String name;
-    private static final String TOKEN_FILE_PATH = "src/main/resources/testTokens.json";
+    private static final String TOKEN_FILE_PATH = "tokenRepo.json";
+    private static final int AS_PORT = 5684;
+
+    private RevokedTokenChecker checker;
 
     private String asServerName;
     private byte[] asPsk;
@@ -121,11 +125,29 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     }
 
     @Override
+    public void start()
+    {
+        super.start();
+
+        System.out.println("Starting revoked tokens checker.");
+        try
+        {
+            checker = new RevokedTokenChecker(this.asServerName, AS_PORT, this.name, this.asPsk, TokenRepository.getInstance());
+        }
+        catch(AceException ex)
+        {
+            throw new RuntimeException(ex.toString());
+        }
+
+        checker.startChecking();
+    }
+
+    @Override
     public void close() throws AceException, IOException {
         LOGGER.info("Closing down CoapsRS ...");
         tokenRepo.close();
         new PrintWriter(TOKEN_FILE_PATH).close();
         this.stop();
-        //this.authInfoEndpoint.close();
+        this.checker.stopChecking();
     }
 }
