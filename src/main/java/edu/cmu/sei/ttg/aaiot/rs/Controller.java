@@ -5,8 +5,10 @@ import edu.cmu.sei.ttg.aaiot.pairing.PairingResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.TempResource;
+import edu.cmu.sei.ttg.aaiot.tokens.RevokedTokenChecker;
 import org.eclipse.californium.core.CoapResource;
 import se.sics.ace.AceException;
+import se.sics.ace.rs.TokenRepository;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,6 +21,9 @@ public class Controller
     private static final String PAIRING_KEY_ID = "pairing";
     private static final byte[] PAIRING_KEY = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     private static final String RS_ID = "rs1";
+    private static final int AS_PORT = 5684;
+
+    private RevokedTokenChecker checker;
 
     private FileASCredentialStore credentialStore;
 
@@ -114,6 +119,10 @@ public class Controller
 
         System.out.println("Starting server");
         rsServer.start();
+
+        System.out.println("Starting revoked tokens checker.");
+        checker = new RevokedTokenChecker(credentialStore.getASIP().getHostAddress(), AS_PORT, RS_ID, credentialStore.getRawASPSK(), TokenRepository.getInstance());
+        checker.startChecking();
     }
 
     private Set<String> getScopes()

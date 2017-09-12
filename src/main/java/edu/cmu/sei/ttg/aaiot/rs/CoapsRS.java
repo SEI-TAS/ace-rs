@@ -120,21 +120,6 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         return endpoint;
     }
 
-    // Sends an introspection request only to check if the token is still marked as valid or not. If invalid, this could
-    // be from a revoked or an expired token.
-    public boolean isTokenActive(CBORObject token) throws AceException
-    {
-        CoapsPskClient client = new CoapsPskClient(this.asServerName, 5684, this.name, this.asPsk);
-
-        CBORObject params = CBORObject.NewMap();
-        params.Add(Constants.TOKEN, token);
-        CBORObject reply = client.sendRequest("introspect", "post", params);
-
-        Map<String, CBORObject> mapReply = Constants.unabbreviate(reply);
-        boolean isActive = mapReply.get("active").AsBoolean();
-        return isActive;
-    }
-
     @Override
     public void close() throws AceException, IOException {
         LOGGER.info("Closing down CoapsRS ...");
