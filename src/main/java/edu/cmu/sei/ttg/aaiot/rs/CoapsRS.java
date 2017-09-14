@@ -10,8 +10,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import COSE.*;
-import com.upokecenter.cbor.CBORObject;
-import edu.cmu.sei.ttg.aaiot.network.CoapsPskClient;
 import edu.cmu.sei.ttg.aaiot.tokens.RevokedTokenChecker;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoapEndpoint;
@@ -22,7 +20,6 @@ import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
 
 import se.sics.ace.AceException;
 import se.sics.ace.COSEparams;
-import se.sics.ace.Constants;
 import se.sics.ace.rs.AsInfo;
 import se.sics.ace.coap.rs.CoapAuthzInfo;
 import se.sics.ace.coap.rs.CoapDeliverer;
@@ -54,6 +51,8 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     private String name;
     private static final String TOKEN_FILE_PATH = "tokenRepo.json";
     private static final int AS_PORT = 5684;
+
+    private static final int RS_COAP_PORT = 5690;
 
     private RevokedTokenChecker checker;
 
@@ -102,8 +101,12 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         this.authInfoEndpoint = new CoapAuthzInfo(this.authInfoHandler);
         add(this.authInfoEndpoint);
 
+        // DTLS endpoint.
         addEndpoint(getCoapsEndpoint());
 
+        // Non-DTLS endpoint for authz-info posts.
+        addEndpoint(new CoapEndpoint(new InetSocketAddress(RS_COAP_PORT)));
+        
         String asURI = "coaps://" + asServerName + "/authz-info/";
         AsInfo asi = new AsInfo(asURI);
         CoapDeliverer dpd = new CoapDeliverer(getRoot(), tokenRepo, null, asi);
