@@ -106,7 +106,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
 
         // Non-DTLS endpoint for authz-info posts.
         addEndpoint(new CoapEndpoint(new InetSocketAddress(RS_COAP_PORT)));
-        
+
         String asURI = "coaps://" + asServerName + "/authz-info/";
         AsInfo asi = new AsInfo(asURI);
         CoapDeliverer dpd = new CoapDeliverer(getRoot(), tokenRepo, null, asi);
@@ -130,19 +130,26 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
     @Override
     public void start()
     {
+        start(false);
+    }
+
+    public void start(boolean checkForRevokedTokens)
+    {
         super.start();
 
-        System.out.println("Starting revoked tokens checker.");
-        try
+        if(checkForRevokedTokens)
         {
-            checker = new RevokedTokenChecker(this.asServerName, AS_PORT, this.name, this.asPsk, TokenRepository.getInstance());
-        }
-        catch(AceException ex)
-        {
-            throw new RuntimeException(ex.toString());
-        }
+            System.out.println("Starting revoked tokens checker.");
+            try
+            {
+                checker = new RevokedTokenChecker(this.asServerName, AS_PORT, this.name, this.asPsk, TokenRepository.getInstance());
+            } catch (AceException ex)
+            {
+                throw new RuntimeException(ex.toString());
+            }
 
-        checker.startChecking();
+            checker.startChecking();
+        }
     }
 
     @Override
@@ -151,6 +158,10 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         tokenRepo.close();
         new PrintWriter(TOKEN_FILE_PATH).close();
         this.stop();
-        this.checker.stopChecking();
+
+        if(this.checker != null)
+        {
+            this.checker.stopChecking();
+        }
     }
 }

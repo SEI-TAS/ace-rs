@@ -5,7 +5,6 @@ import edu.cmu.sei.ttg.aaiot.pairing.PairingResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.TempResource;
-import edu.cmu.sei.ttg.aaiot.tokens.RevokedTokenChecker;
 import org.eclipse.californium.core.CoapResource;
 import se.sics.ace.AceException;
 
@@ -17,7 +16,6 @@ import java.util.*;
  */
 public class Controller
 {
-    private static final String PAIRING_KEY_ID = "pairing";
     private static final byte[] PAIRING_KEY = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     private static final String RS_ID = "rs1";
 
@@ -45,7 +43,7 @@ public class Controller
             try
             {
                 System.out.println("");
-                System.out.println("Choose (p)air and restart server, (s)tart server, or (q)uit: ");
+                System.out.println("Choose (p)air and restart server, (s)tart server, (v) start server with revocation check, or (q)uit: ");
                 char choice = scanner.next().charAt(0);
 
                 switch (choice)
@@ -56,7 +54,7 @@ public class Controller
                         if (success)
                         {
                             System.out.println("Finished pairing procedure!");
-                            setupCoapRS();
+                            setupCoapRS(false);
                             System.out.println("Server restarted!");
                         } else
                         {
@@ -65,7 +63,10 @@ public class Controller
 
                         break;
                     case 's':
-                        setupCoapRS();
+                        setupCoapRS(false);
+                        break;
+                    case 'v':
+                        setupCoapRS(true);
                         break;
                     case 'q':
                         System.exit(0);
@@ -86,7 +87,7 @@ public class Controller
     {
         try
         {
-            PairingResource pairingManager = new PairingResource(PAIRING_KEY_ID, PAIRING_KEY, RS_ID, getScopeString(), credentialStore);
+            PairingResource pairingManager = new PairingResource(PAIRING_KEY, RS_ID, getScopeString(), credentialStore);
             return pairingManager.pair();
         }
         catch(Exception ex)
@@ -97,7 +98,7 @@ public class Controller
     }
 
     // Starts the RS.
-    private void setupCoapRS() throws COSE.CoseException, IOException, AceException
+    private void setupCoapRS(boolean startRevocationChecker) throws COSE.CoseException, IOException, AceException
     {
         if(rsServer != null)
         {
@@ -114,7 +115,7 @@ public class Controller
         }
 
         System.out.println("Starting server");
-        rsServer.start();
+        rsServer.start(startRevocationChecker);
     }
 
     private Set<String> getScopes()
