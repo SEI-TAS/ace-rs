@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import COSE.*;
+import edu.cmu.sei.ttg.aaiot.tokens.IRemovedTokenTracker;
 import edu.cmu.sei.ttg.aaiot.tokens.RevokedTokenChecker;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoapEndpoint;
@@ -41,7 +42,8 @@ import se.sics.ace.rs.TokenRepository;
  * @author Sebastian Echeverria
  *
  */
-public class CoapsRS extends CoapServer implements AutoCloseable {
+public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenTracker
+{
 
     /**
      * The logger
@@ -142,7 +144,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
             System.out.println("Starting revoked tokens checker.");
             try
             {
-                checker = new RevokedTokenChecker(this.asServerName, AS_PORT, this.name, this.asPsk, TokenRepository.getInstance());
+                checker = new RevokedTokenChecker(this.asServerName, AS_PORT, this.name, this.asPsk, this, TokenRepository.getInstance());
             } catch (AceException ex)
             {
                 throw new RuntimeException(ex.toString());
@@ -163,5 +165,11 @@ public class CoapsRS extends CoapServer implements AutoCloseable {
         {
             this.checker.stopChecking();
         }
+    }
+
+    @Override
+    public void notifyRemovedToken(String s, String s1)
+    {
+        // Nothing for now, we are not tracking this.
     }
 }
