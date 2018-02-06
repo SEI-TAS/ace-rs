@@ -109,7 +109,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         // Non-DTLS endpoint for authz-info posts.
         addEndpoint(new CoapEndpoint(new InetSocketAddress(RS_COAP_PORT)));
 
-        String asURI = "coaps://" + asServerName + "/authz-info/";
+        String asURI = "coap://" + asServerName + "/authz-info/";
         AsInfo asi = new AsInfo(asURI);
         CoapDeliverer dpd = new CoapDeliverer(getRoot(), tokenRepo, null, asi);
         setMessageDeliverer(dpd);

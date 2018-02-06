@@ -78,6 +78,7 @@ public class Controller
             catch(Exception ex)
             {
                 System.out.println("Error processing command: " + ex.toString());
+                //ex.printStackTrace();
             }
         }
     }
@@ -103,6 +104,11 @@ public class Controller
         if(rsServer != null)
         {
             rsServer.close();
+        }
+
+        if(credentialStore.getASid() == null)
+        {
+            throw new AceException("Server can't be started since there is no paired AS.");
         }
 
         rsServer = new CoapsRS(RS_ID, myScopes);
