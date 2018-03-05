@@ -118,14 +118,15 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
     private CoapEndpoint getCoapsEndpoint() throws CoseException, IOException
     {
         LOGGER.info("Starting CoapsRS with PSK only");
-        DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder(new InetSocketAddress(5685));
+        DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder().setAddress(new InetSocketAddress(5685));
         config.setSupportedCipherSuites(new CipherSuite[]{CipherSuite.TLS_PSK_WITH_AES_128_CCM_8});
 
         DtlspPskStore pskStore = new DtlspPskStore(this.authInfoHandler);
         config.setPskStore(pskStore);
 
         DTLSConnector connector = new DTLSConnector(config.build());
-        CoapEndpoint endpoint = new CoapEndpoint(connector, NetworkConfig.getStandard());
+        CoapEndpoint endpoint = new CoapEndpoint.CoapEndpointBuilder().setConnector(connector)
+                .setNetworkConfig(NetworkConfig.getStandard()).build();
         return endpoint;
     }
 
