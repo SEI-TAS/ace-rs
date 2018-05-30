@@ -79,9 +79,10 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
 
     private String name;
     private static final String TOKEN_FILE_PATH = "tokenRepo.json";
-    private static final int AS_PORT = 5684;
+    private static final int AS_COAPS_PORT = 5684;
 
-    private static final int RS_COAP_PORT = 5690;
+    private static final int RS_COAP_PORT = 5683;
+    private static final int RS_COAPS_PORT = 5687; // FOR TESTS: 5684
 
     private RevokedTokenChecker checker;
 
@@ -114,7 +115,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         scopeValidator = validator;
     }
 
-    public void setAS(String asName, String asServerName, byte[] asPSK) throws AceException, CoseException, IOException
+    public void setAS(String asName, String asServerName, byte[] asPSK) throws AceException, IOException
     {
         this.asServerName = asServerName;
         this.asPsk = asPSK;
@@ -134,7 +135,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         addEndpoint(getCoapsEndpoint());
 
         // Non-DTLS endpoint for authz-info posts.
-        addEndpoint(new CoapEndpoint(new InetSocketAddress(RS_COAP_PORT)));
+        addEndpoint(new CoapEndpoint.CoapEndpointBuilder().setPort(RS_COAP_PORT).build());
 
         String asURI = "coap://" + asServerName + "/authz-info/";
         AsInfo asi = new AsInfo(asURI);
@@ -142,10 +143,10 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         setMessageDeliverer(dpd);
     }
 
-    private CoapEndpoint getCoapsEndpoint() throws CoseException, IOException
+    private CoapEndpoint getCoapsEndpoint()
     {
         LOGGER.info("Starting CoapsRS with PSK only");
-        DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder().setAddress(new InetSocketAddress(5685));
+        DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder().setAddress(new InetSocketAddress(RS_COAPS_PORT));
         config.setSupportedCipherSuites(new CipherSuite[]{CipherSuite.TLS_PSK_WITH_AES_128_CCM_8});
 
         DtlspPskStore pskStore = new DtlspPskStore(this.authInfoHandler);
@@ -172,7 +173,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
             System.out.println("Starting revoked tokens checker.");
             try
             {
-                checker = new RevokedTokenChecker(this.asServerName, AS_PORT, this.name, this.asPsk, this, TokenRepository.getInstance());
+                checker = new RevokedTokenChecker(this.asServerName, AS_COAPS_PORT, this.name, this.asPsk, this, TokenRepository.getInstance());
             } catch (AceException ex)
             {
                 throw new RuntimeException(ex.toString());

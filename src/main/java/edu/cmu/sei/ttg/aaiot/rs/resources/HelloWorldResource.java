@@ -27,18 +27,54 @@ DM18-0702
 
 package edu.cmu.sei.ttg.aaiot.rs.resources;
 
+import com.upokecenter.cbor.CBORObject;
+import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.coap.CoAP;
+import org.eclipse.californium.core.server.resources.CoapExchange;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by sebastianecheverria on 8/3/17.
- */
-public interface IIoTResource
+public class HelloWorldResource extends CoapResource implements IIoTResource
 {
-    Set<String> getActions(String scopeName);
+    public HelloWorldResource()
+    {
+        super("helloWorld");
+        getAttributes().setTitle("HelloWorld Resource");
+    }
 
-    List<String> getScopeNames();
+    @Override
+    public void handleGET(CoapExchange exchange)
+    {
+        CBORObject data = CBORObject.FromObject("HelloWorld!");
+        exchange.respond(CoAP.ResponseCode.CONTENT, data.EncodeToBytes());
+    }
 
-    Map<String, Set<String>> getScopeHandler(String scopeName);
+    @Override
+    public Set<String> getActions(String scopeName)
+    {
+        Set<String> actions = new HashSet<>();
+        actions.add("GET");
+        return actions;
+    }
+
+    @Override
+    public List<String> getScopeNames()
+    {
+        ArrayList<String> scopeNames = new ArrayList<>();
+        scopeNames.add("HelloWorld");
+        return scopeNames;
+    }
+
+    @Override
+    public Map<String, Set<String>> getScopeHandler(String scopeName)
+    {
+        Map<String, Set<String>> resourceMap = new HashMap<>();
+        resourceMap.put(this.getName(), this.getActions(scopeName));
+        return resourceMap;
+    }
 }

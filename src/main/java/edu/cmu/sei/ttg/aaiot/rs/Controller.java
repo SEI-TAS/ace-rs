@@ -29,13 +29,16 @@ package edu.cmu.sei.ttg.aaiot.rs;
 
 import edu.cmu.sei.ttg.aaiot.credentials.FileASCredentialStore;
 import edu.cmu.sei.ttg.aaiot.pairing.PairingResource;
+import edu.cmu.sei.ttg.aaiot.rs.resources.HelloWorldResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
+import edu.cmu.sei.ttg.aaiot.rs.resources.LockResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.TempResource;
 import org.eclipse.californium.core.CoapResource;
 import se.sics.ace.AceException;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.*;
 
 /**
@@ -44,7 +47,9 @@ import java.util.*;
 public class Controller
 {
     private static final byte[] PAIRING_KEY = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    private static final String RS_ID = "rs1";
+    private static final String RS_ID = "RS1";
+    //private static final byte[] TEST_KEY = {(byte) 0xb1, (byte) 0xb2, (byte) 0xb3, 0x04, 0x05, 0x06, 0x07, 0x08,
+    //        0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10};
 
     private FileASCredentialStore credentialStore;
 
@@ -52,17 +57,22 @@ public class Controller
     Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
     ArrayList<IIoTResource> resources = new ArrayList<>();
 
-    public void run() throws COSE.CoseException, IOException, AceException
+    public void run() throws COSE.CoseException, IOException
     {
         credentialStore = new FileASCredentialStore();
+
+        // TODO: For testing purposes only:
+        //credentialStore.storeAS("AS", TEST_KEY, InetAddress.getByName("127.0.0.1"));
 
         // Set up our static resources.
         resources.add(new TempResource());
         resources.add(new LightResource());
+        resources.add(new HelloWorldResource());
+        resources.add(new LockResource());
         for(IIoTResource resource : resources)
         {
             for (String scopeName : resource.getScopeNames())
-                myScopes.put(scopeName, resource.getScopeHandler());
+                myScopes.put(scopeName, resource.getScopeHandler(scopeName));
         }
 
         Scanner scanner = new Scanner(System.in);

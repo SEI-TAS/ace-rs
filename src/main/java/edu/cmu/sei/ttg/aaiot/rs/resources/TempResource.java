@@ -57,7 +57,7 @@ public class TempResource extends CoapResource implements IIoTResource {
         exchange.respond(CoAP.ResponseCode.CONTENT, temperature.EncodeToBytes());
     }
 
-    public Set<String> getActions()
+    public Set<String> getActions(String scopeName)
     {
         Set<String> actions = new HashSet<>();
         actions.add("GET");
@@ -71,10 +71,10 @@ public class TempResource extends CoapResource implements IIoTResource {
         return scopeNames;
     }
 
-    public Map<String, Set<String>> getScopeHandler()
+    public Map<String, Set<String>> getScopeHandler(String scopeName)
     {
         Map<String, Set<String>> tempResourceMap = new HashMap<>();
-        tempResourceMap.put(this.getName(), this.getActions());
+        tempResourceMap.put(this.getName(), this.getActions(scopeName));
         return tempResourceMap;
     }
 

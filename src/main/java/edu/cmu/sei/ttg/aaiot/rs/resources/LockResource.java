@@ -24,7 +24,6 @@ Copyright 2016-2018 RISE SICS AB.
 
 DM18-0702
 */
-
 package edu.cmu.sei.ttg.aaiot.rs.resources;
 
 import com.upokecenter.cbor.CBORObject;
@@ -32,52 +31,67 @@ import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Created by sebastianecheverria on 8/3/17.
- */
-public class LightResource extends CoapResource implements IIoTResource
+public class LockResource extends CoapResource implements IIoTResource
 {
-    public LightResource() {
-        super("light");
-        getAttributes().setTitle("Temperature Resource");
+    private boolean lock = false;
+
+    public LockResource()
+    {
+        super("lock");
+        getAttributes().setTitle("Lock Resource");
     }
 
     @Override
     public void handleGET(CoapExchange exchange)
     {
-        int minVal = 0;
-        int maxVal = 1;
-        int currVal = ThreadLocalRandom.current().nextInt(minVal, maxVal + 1);
-
-        CBORObject lightsStatus = CBORObject.NewMap();
-        lightsStatus.Add(1, currVal);
-        exchange.respond(CoAP.ResponseCode.CONTENT, lightsStatus.EncodeToBytes());
+        CBORObject data = CBORObject.FromObject(lock);
+        exchange.respond(CoAP.ResponseCode.CONTENT, data.EncodeToBytes());
     }
 
+    @Override
+    public void handlePUT(CoapExchange exchange)
+    {
+        // TODO: get CBOR boolean value.
+
+        CBORObject data = CBORObject.FromObject("Ok!");
+        exchange.respond(CoAP.ResponseCode.CONTENT, data.EncodeToBytes());
+    }
+
+
+    @Override
     public Set<String> getActions(String scopeName)
     {
         Set<String> actions = new HashSet<>();
         actions.add("GET");
+        if(scopeName.equals("rw_Lock"))
+        {
+            actions.add("PUT");
+        }
         return actions;
     }
 
+    @Override
     public List<String> getScopeNames()
     {
         ArrayList<String> scopeNames = new ArrayList<>();
-        scopeNames.add("r_light");
+        scopeNames.add("r_Lock");
+        scopeNames.add("rw_Lock");
         return scopeNames;
+
     }
 
+    @Override
     public Map<String, Set<String>> getScopeHandler(String scopeName)
     {
         Map<String, Set<String>> resourceMap = new HashMap<>();
         resourceMap.put(this.getName(), this.getActions(scopeName));
         return resourceMap;
     }
-
-
 }
-
