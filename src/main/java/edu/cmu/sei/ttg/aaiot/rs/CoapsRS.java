@@ -106,11 +106,13 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
      * @throws CoseException
      *
      */
-    public CoapsRS(String name, Map<String, Map<String, Set<String>>> myScopes)
+    public CoapsRS(String name, Map<String, Map<String, Set<Short>>> myScopes)
             throws AceException, CoseException, IOException {
 
         this.name = name;
-        KissValidator validator = new KissValidator(Collections.singleton(name), myScopes);
+        Set<String> audiences = new HashSet<>();
+        audiences.add(name);
+        KissValidator validator = new KissValidator(audiences, myScopes);
         audienceValidator = validator;
         scopeValidator = validator;
     }

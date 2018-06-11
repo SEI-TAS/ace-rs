@@ -54,7 +54,7 @@ public class Controller
     private FileASCredentialStore credentialStore;
 
     private CoapsRS rsServer = null;
-    Map<String, Map<String, Set<String>>> myScopes = new HashMap<>();
+    Map<String, Map<String, Set<Short>>> myScopes = new HashMap<>();
     ArrayList<IIoTResource> resources = new ArrayList<>();
 
     public void run() throws COSE.CoseException, IOException

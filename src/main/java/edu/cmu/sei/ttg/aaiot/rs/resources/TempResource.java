@@ -31,6 +31,7 @@ import com.upokecenter.cbor.CBORObject;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
+import se.sics.ace.Constants;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -57,10 +58,10 @@ public class TempResource extends CoapResource implements IIoTResource {
         exchange.respond(CoAP.ResponseCode.CONTENT, temperature.EncodeToBytes());
     }
 
-    public Set<String> getActions(String scopeName)
+    public Set<Short> getActions(String scopeName)
     {
-        Set<String> actions = new HashSet<>();
-        actions.add("GET");
+        Set<Short> actions = new HashSet<>();
+        actions.add(Constants.GET);
         return actions;
     }
 
@@ -71,9 +72,9 @@ public class TempResource extends CoapResource implements IIoTResource {
         return scopeNames;
     }
 
-    public Map<String, Set<String>> getScopeHandler(String scopeName)
+    public Map<String, Set<Short>> getScopeHandler(String scopeName)
     {
-        Map<String, Set<String>> tempResourceMap = new HashMap<>();
+        Map<String, Set<Short>> tempResourceMap = new HashMap<>();
         tempResourceMap.put(this.getName(), this.getActions(scopeName));
         return tempResourceMap;
     }

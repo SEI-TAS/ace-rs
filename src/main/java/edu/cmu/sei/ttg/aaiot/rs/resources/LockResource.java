@@ -30,6 +30,7 @@ import com.upokecenter.cbor.CBORObject;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
+import se.sics.ace.Constants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,21 +59,19 @@ public class LockResource extends CoapResource implements IIoTResource
     @Override
     public void handlePUT(CoapExchange exchange)
     {
-        // TODO: get CBOR boolean value.
-
-        CBORObject data = CBORObject.FromObject("Ok!");
+        CBORObject data = CBORObject.DecodeFromBytes(exchange.getRequestPayload());
+        this.lock = data.AsBoolean();
         exchange.respond(CoAP.ResponseCode.CONTENT, data.EncodeToBytes());
     }
 
-
     @Override
-    public Set<String> getActions(String scopeName)
+    public Set<Short> getActions(String scopeName)
     {
-        Set<String> actions = new HashSet<>();
-        actions.add("GET");
+        Set<Short> actions = new HashSet<>();
+        actions.add(Constants.GET);
         if(scopeName.equals("rw_Lock"))
         {
-            actions.add("PUT");
+            actions.add(Constants.PUT);
         }
         return actions;
     }
@@ -88,9 +87,9 @@ public class LockResource extends CoapResource implements IIoTResource
     }
 
     @Override
-    public Map<String, Set<String>> getScopeHandler(String scopeName)
+    public Map<String, Set<Short>> getScopeHandler(String scopeName)
     {
-        Map<String, Set<String>> resourceMap = new HashMap<>();
+        Map<String, Set<Short>> resourceMap = new HashMap<>();
         resourceMap.put(this.getName(), this.getActions(scopeName));
         return resourceMap;
     }

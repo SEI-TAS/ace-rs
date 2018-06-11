@@ -36,9 +36,9 @@ import java.util.Set;
  */
 public interface IIoTResource
 {
-    Set<String> getActions(String scopeName);
+    Set<Short> getActions(String scopeName);
 
     List<String> getScopeNames();
 
-    Map<String, Set<String>> getScopeHandler(String scopeName);
+    Map<String, Set<Short>> getScopeHandler(String scopeName);
 }

@@ -14,3 +14,4 @@ out/
 credentials.json
 tokenRepo.json
 /classes
+/._.DS_STORE

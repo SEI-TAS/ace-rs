@@ -31,6 +31,7 @@ import com.upokecenter.cbor.CBORObject;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
+import se.sics.ace.Constants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,15 +51,15 @@ public class HelloWorldResource extends CoapResource implements IIoTResource
     @Override
     public void handleGET(CoapExchange exchange)
     {
-        CBORObject data = CBORObject.FromObject("HelloWorld!");
-        exchange.respond(CoAP.ResponseCode.CONTENT, data.EncodeToBytes());
+        //CBORObject data = CBORObject.FromObject("HelloWorld!");
+        exchange.respond(CoAP.ResponseCode.CONTENT, "HelloWorld!".getBytes());
     }
 
     @Override
-    public Set<String> getActions(String scopeName)
+    public Set<Short> getActions(String scopeName)
     {
-        Set<String> actions = new HashSet<>();
-        actions.add("GET");
+        Set<Short> actions = new HashSet<>();
+        actions.add(Constants.GET);
         return actions;
     }
 
@@ -71,9 +72,9 @@ public class HelloWorldResource extends CoapResource implements IIoTResource
     }
 
     @Override
-    public Map<String, Set<String>> getScopeHandler(String scopeName)
+    public Map<String, Set<Short>> getScopeHandler(String scopeName)
     {
-        Map<String, Set<String>> resourceMap = new HashMap<>();
+        Map<String, Set<Short>> resourceMap = new HashMap<>();
         resourceMap.put(this.getName(), this.getActions(scopeName));
         return resourceMap;
     }
