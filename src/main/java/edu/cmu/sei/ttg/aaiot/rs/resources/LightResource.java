@@ -58,27 +58,12 @@ public class LightResource extends CoapResource implements IIoTResource
         exchange.respond(CoAP.ResponseCode.CONTENT, lightsStatus.EncodeToBytes());
     }
 
-    public Set<Short> getActions(String scopeName)
+    @Override
+    public Map<String, Set<Short>> getActionsByScope()
     {
-        Set<Short> actions = new HashSet<>();
-        actions.add(Constants.GET);
-        return actions;
+        Map<String, Set<Short>> scopesAndActions = new HashMap<>();
+        scopesAndActions.put("r_light", Collections.singleton(Constants.GET));
+        return scopesAndActions;
     }
-
-    public List<String> getScopeNames()
-    {
-        ArrayList<String> scopeNames = new ArrayList<>();
-        scopeNames.add("r_light");
-        return scopeNames;
-    }
-
-    public Map<String, Set<Short>> getScopeHandler(String scopeName)
-    {
-        Map<String, Set<Short>> resourceMap = new HashMap<>();
-        resourceMap.put(this.getName(), this.getActions(scopeName));
-        return resourceMap;
-    }
-
-
 }
 

@@ -33,12 +33,7 @@ import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import se.sics.ace.Constants;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class HelloWorldResource extends CoapResource implements IIoTResource
 {
@@ -56,26 +51,10 @@ public class HelloWorldResource extends CoapResource implements IIoTResource
     }
 
     @Override
-    public Set<Short> getActions(String scopeName)
+    public Map<String, Set<Short>> getActionsByScope()
     {
-        Set<Short> actions = new HashSet<>();
-        actions.add(Constants.GET);
-        return actions;
-    }
-
-    @Override
-    public List<String> getScopeNames()
-    {
-        ArrayList<String> scopeNames = new ArrayList<>();
-        scopeNames.add("HelloWorld");
-        return scopeNames;
-    }
-
-    @Override
-    public Map<String, Set<Short>> getScopeHandler(String scopeName)
-    {
-        Map<String, Set<Short>> resourceMap = new HashMap<>();
-        resourceMap.put(this.getName(), this.getActions(scopeName));
-        return resourceMap;
+        Map<String, Set<Short>> scopesAndActions = new HashMap<>();
+        scopesAndActions.put("HelloWorld", Collections.singleton(Constants.GET));
+        return scopesAndActions;
     }
 }

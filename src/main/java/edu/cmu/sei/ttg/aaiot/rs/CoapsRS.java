@@ -102,13 +102,10 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
      * Constructor.
      *
      * @param myScopes the scopes to set up
-     * @throws AceException
-     * @throws CoseException
      *
      */
     public CoapsRS(String name, Map<String, Map<String, Set<Short>>> myScopes)
-            throws AceException, CoseException, IOException {
-
+    {
         this.name = name;
         Set<String> audiences = new HashSet<>();
         audiences.add(name);

@@ -29,16 +29,11 @@ package edu.cmu.sei.ttg.aaiot.rs;
 
 import edu.cmu.sei.ttg.aaiot.credentials.FileASCredentialStore;
 import edu.cmu.sei.ttg.aaiot.pairing.PairingResource;
-import edu.cmu.sei.ttg.aaiot.rs.resources.HelloWorldResource;
-import edu.cmu.sei.ttg.aaiot.rs.resources.IIoTResource;
-import edu.cmu.sei.ttg.aaiot.rs.resources.LightResource;
-import edu.cmu.sei.ttg.aaiot.rs.resources.LockResource;
-import edu.cmu.sei.ttg.aaiot.rs.resources.TempResource;
+import edu.cmu.sei.ttg.aaiot.rs.resources.*;
 import org.eclipse.californium.core.CoapResource;
 import se.sics.ace.AceException;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.*;
 
 /**
@@ -51,11 +46,13 @@ public class Controller
     //private static final byte[] TEST_KEY = {(byte) 0xb1, (byte) 0xb2, (byte) 0xb3, 0x04, 0x05, 0x06, 0x07, 0x08,
     //        0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10};
 
+    private static final String BASE_PATH = "ace";
+
     private FileASCredentialStore credentialStore;
 
     private CoapsRS rsServer = null;
-    Map<String, Map<String, Set<Short>>> myScopes = new HashMap<>();
-    ArrayList<IIoTResource> resources = new ArrayList<>();
+    private Map<String, Map<String, Set<Short>>> myScopes = new HashMap<>();
+    private ArrayList<IIoTResource> resources = new ArrayList<>();
 
     public void run() throws COSE.CoseException, IOException
     {
@@ -69,10 +66,18 @@ public class Controller
         resources.add(new LightResource());
         resources.add(new HelloWorldResource());
         resources.add(new LockResource());
+
         for(IIoTResource resource : resources)
         {
-            for (String scopeName : resource.getScopeNames())
-                myScopes.put(scopeName, resource.getScopeHandler(scopeName));
+            Map<String, Set<Short>> actionsByScope = resource.getActionsByScope();
+            for (String scopeName : actionsByScope.keySet())
+            {
+                Map<String, Set<Short>> resourceActions = new HashMap<>();
+                String fullResourceName = BASE_PATH + "/" + ((CoapResource) resource).getName();
+                System.out.println(fullResourceName);
+                resourceActions.put(fullResourceName, actionsByScope.get(scopeName));
+                myScopes.put(scopeName, resourceActions);
+            }
         }
 
         Scanner scanner = new Scanner(System.in);
@@ -136,7 +141,7 @@ public class Controller
     }
 
     // Starts the RS.
-    private void setupCoapRS(boolean startRevocationChecker) throws COSE.CoseException, IOException, AceException
+    private void setupCoapRS(boolean startRevocationChecker) throws IOException, AceException
     {
         if(rsServer != null)
         {
@@ -152,10 +157,12 @@ public class Controller
         rsServer.setAS(credentialStore.getASid(), credentialStore.getASIP().getHostAddress(), credentialStore.getRawASPSK());
 
         // Add actual resources.
+        CoapResource baseResource = new CoapResource(BASE_PATH);
         for (IIoTResource resource : resources)
         {
-            rsServer.add((CoapResource) resource);
+            baseResource.add((CoapResource) resource);
         }
+        rsServer.add(baseResource);
 
         System.out.println("Starting server");
         rsServer.start(startRevocationChecker);

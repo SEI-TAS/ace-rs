@@ -27,7 +27,6 @@ DM18-0702
 
 package edu.cmu.sei.ttg.aaiot.rs.resources;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,9 +35,5 @@ import java.util.Set;
  */
 public interface IIoTResource
 {
-    Set<Short> getActions(String scopeName);
-
-    List<String> getScopeNames();
-
-    Map<String, Set<Short>> getScopeHandler(String scopeName);
+    Map<String, Set<Short>> getActionsByScope();
 }
