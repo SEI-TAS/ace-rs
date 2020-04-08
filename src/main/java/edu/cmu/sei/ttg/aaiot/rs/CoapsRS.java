@@ -48,13 +48,13 @@ import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
 
 import se.sics.ace.AceException;
 import se.sics.ace.COSEparams;
-import se.sics.ace.rs.AsInfo;
 import se.sics.ace.coap.rs.CoapAuthzInfo;
 import se.sics.ace.coap.rs.CoapDeliverer;
 import se.sics.ace.coap.rs.dtlsProfile.DtlspPskStore;
 import se.sics.ace.cwt.CwtCryptoCtx;
 import se.sics.ace.examples.KissTime;
 import se.sics.ace.examples.KissValidator;
+import se.sics.ace.rs.AsRequestCreationHints;
 import se.sics.ace.rs.AudienceValidator;
 import se.sics.ace.rs.AuthzInfo;
 import se.sics.ace.rs.ScopeValidator;
@@ -134,11 +134,11 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         addEndpoint(getCoapsEndpoint());
 
         // Non-DTLS endpoint for authz-info posts.
-        addEndpoint(new CoapEndpoint.CoapEndpointBuilder().setPort(RS_COAP_PORT).build());
+        addEndpoint(new CoapEndpoint.Builder().setPort(RS_COAP_PORT).build());
 
         String asURI = "coap://" + asServerName + "/authz-info/";
-        AsInfo asi = new AsInfo(asURI);
-        CoapDeliverer dpd = new CoapDeliverer(getRoot(), tokenRepo, null, asi);
+        AsRequestCreationHints arch = new AsRequestCreationHints(asURI, null, false, false);
+        CoapDeliverer dpd = new CoapDeliverer(getRoot(), tokenRepo, null, arch);
         setMessageDeliverer(dpd);
     }
 
@@ -152,7 +152,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         config.setPskStore(pskStore);
 
         DTLSConnector connector = new DTLSConnector(config.build());
-        CoapEndpoint endpoint = new CoapEndpoint.CoapEndpointBuilder().setConnector(connector)
+        CoapEndpoint endpoint = new CoapEndpoint.Builder().setConnector(connector)
                 .setNetworkConfig(NetworkConfig.getStandard()).build();
         return endpoint;
     }
