@@ -43,7 +43,7 @@ public class LightResource extends CoapResource implements IIoTResource
 {
     public LightResource() {
         super("light");
-        getAttributes().setTitle("Temperature Resource");
+        getAttributes().setTitle("Light Resource");
     }
 
     @Override
