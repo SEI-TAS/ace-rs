@@ -8,7 +8,11 @@ The following software needs to be installed for this project to compile and run
 This project also depends on the ace-java (https://bitbucket.org/sebastian_echeverria/ace-java-postgres) and aaiot-lib (https://github.com/SEI-TTG/aaiot-lib) libraries. You should download, compile, and deploy both of them to a local Maven repo, so that this project will find them when resolving its dependencies.
  
 ## Configuration
-No configuration is needed. The RS id is currently hardcoded to "RS1". It can only be changed in Controller.java, attribute RS_ID.
+No configuration is needed. Optional parameters are available in "config.json":
+
+ * id: the ID or name the RS will use
+ * local_coap_port: the port the RS server will be use to listen to COAP requests. 
+ * local_coaps_port: the port the RS server will be use to listen to COAPS requests. Note that the default value is not the standard COAPS port to avoid clashing with an AS running on the same computer.
 
 Credentials from a pairing procedure are stored in credentials.json. If you want to clear a previous pairing, simply delete the file.
  

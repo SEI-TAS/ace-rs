@@ -27,6 +27,7 @@ DM18-0702
 
 package edu.cmu.sei.ttg.aaiot.rs;
 
+import edu.cmu.sei.ttg.aaiot.config.Config;
 import edu.cmu.sei.ttg.aaiot.credentials.FileASCredentialStore;
 import edu.cmu.sei.ttg.aaiot.pairing.PairingResource;
 import edu.cmu.sei.ttg.aaiot.rs.resources.*;
@@ -41,8 +42,10 @@ import java.util.*;
  */
 public class Controller
 {
+    // Config file used to load configurations.
+    private static final String CONFIG_FILE = "./config.json";
+
     private static final byte[] PAIRING_KEY = {'a', 'b', 'c', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    private static final String RS_ID = "RS1";
     //private static final byte[] TEST_KEY = {(byte) 0xb1, (byte) 0xb2, (byte) 0xb3, 0x04, 0x05, 0x06, 0x07, 0x08,
     //        0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10};
 
@@ -50,12 +53,25 @@ public class Controller
 
     private FileASCredentialStore credentialStore;
 
+    private String rsId = "";
     private CoapsRS rsServer = null;
     private Map<String, Map<String, Set<Short>>> myScopes = new HashMap<>();
     private ArrayList<IIoTResource> resources = new ArrayList<>();
 
     public void run() throws COSE.CoseException, IOException
     {
+        try
+        {
+            Config.load(CONFIG_FILE);
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Error loading config file: " + ex.toString());
+            throw new RuntimeException("Error loading config file: " + ex.toString());
+        }
+
+        rsId = Config.data.get("id");
+
         credentialStore = new FileASCredentialStore();
 
         // TODO: For testing purposes only:
@@ -130,7 +146,7 @@ public class Controller
     {
         try
         {
-            PairingResource pairingManager = new PairingResource(PAIRING_KEY, RS_ID, getScopeString(), credentialStore);
+            PairingResource pairingManager = new PairingResource(PAIRING_KEY, rsId, getScopeString(), credentialStore);
             return pairingManager.pair();
         }
         catch(Exception ex)
@@ -153,7 +169,7 @@ public class Controller
             throw new AceException("Server can't be started since there is no paired AS.");
         }
 
-        rsServer = new CoapsRS(RS_ID, myScopes);
+        rsServer = new CoapsRS(rsId, myScopes);
         rsServer.setAS(credentialStore.getASid(), credentialStore.getASIP().getHostAddress(), credentialStore.getRawASPSK());
 
         // Add actual resources.

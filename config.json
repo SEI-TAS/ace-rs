@@ -1,0 +1,5 @@
+{
+  "id" : "RS1",
+  "local_coap_port": "5683",
+  "local_coaps_port": "5687"
+}

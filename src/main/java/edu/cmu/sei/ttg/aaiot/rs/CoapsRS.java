@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import COSE.*;
+import edu.cmu.sei.ttg.aaiot.config.Config;
 import edu.cmu.sei.ttg.aaiot.tokens.IRemovedTokenTracker;
 import edu.cmu.sei.ttg.aaiot.tokens.RevokedTokenChecker;
 import org.eclipse.californium.core.CoapServer;
@@ -81,13 +82,12 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
     private static final String TOKEN_FILE_PATH = "tokenRepo.json";
     private static final int AS_COAPS_PORT = 5684;
 
-    private static final int RS_COAP_PORT = 5683;
-    private static final int RS_COAPS_PORT = 5687; // FOR TESTS: 5684
-
     private RevokedTokenChecker checker;
 
     private String asServerName;
     private byte[] asPsk;
+    private int rsCoapPort;
+    private int rsCoapsPort;
 
     private AuthzInfo authInfoHandler = null;
     private CoapAuthzInfo authInfoEndpoint;
@@ -112,6 +112,9 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         KissValidator validator = new KissValidator(audiences, myScopes);
         audienceValidator = validator;
         scopeValidator = validator;
+
+        rsCoapPort = Integer.parseInt(Config.data.get("local_coap_port"));
+        rsCoapsPort = Integer.parseInt(Config.data.get("local_coaps_port"));
     }
 
     public void setAS(String asName, String asServerName, byte[] asPSK) throws AceException, IOException
@@ -134,7 +137,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
         addEndpoint(getCoapsEndpoint());
 
         // Non-DTLS endpoint for authz-info posts.
-        addEndpoint(new CoapEndpoint.Builder().setPort(RS_COAP_PORT).build());
+        addEndpoint(new CoapEndpoint.Builder().setPort(rsCoapPort).build());
 
         String asURI = "coap://" + asServerName + "/authz-info/";
         AsRequestCreationHints arch = new AsRequestCreationHints(asURI, null, false, false);
@@ -145,7 +148,7 @@ public class CoapsRS extends CoapServer implements AutoCloseable, IRemovedTokenT
     private CoapEndpoint getCoapsEndpoint()
     {
         LOGGER.info("Starting CoapsRS with PSK only");
-        DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder().setAddress(new InetSocketAddress(RS_COAPS_PORT));
+        DtlsConnectorConfig.Builder config = new DtlsConnectorConfig.Builder().setAddress(new InetSocketAddress(rsCoapsPort));
         config.setSupportedCipherSuites(new CipherSuite[]{CipherSuite.TLS_PSK_WITH_AES_128_CCM_8});
 
         DtlspPskStore pskStore = new DtlspPskStore(this.authInfoHandler);

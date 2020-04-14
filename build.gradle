@@ -23,3 +23,11 @@ dependencies {
 run {
     standardInput = System.in
 }
+
+distributions {
+    main {
+        contents {
+            from ('config.json') { into "bin" }
+        }
+    }
+}
