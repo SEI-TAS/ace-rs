@@ -25,3 +25,5 @@ The following resources are available on this server:
  * ace/lock: handle a lock value that can be true or false.
    * GET - scopes to access: r_lock, or rw_lock
    * PUT - scopes to access: rw_lock
+   
+For more information, see https://github.com/SEI-TAS/ace-client/wiki
